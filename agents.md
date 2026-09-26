@@ -1,4 +1,4 @@
-# OpenChat
+# AI-App
 
 ## Stack
 
