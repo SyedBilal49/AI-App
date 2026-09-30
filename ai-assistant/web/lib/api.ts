@@ -1,10 +1,7 @@
 import type { ModelSelection, ModelsResponse, Role, StreamMeta } from "@/lib/types";
 
-/**
- * Requests go to `/api/*` on the same origin; `next.config.ts` rewrites them to
- * the FastAPI server (API_URL), so the browser never needs CORS.
- */
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "/api";
+/** Same-origin Vercel route handlers keep the Gemini key server-side. */
+const API_BASE = "/api";
 
 export class ApiError extends Error {
   constructor(
@@ -24,9 +21,7 @@ async function errorMessage(res: Response): Promise<string> {
   } catch {
     /* not JSON */
   }
-  if (res.status === 502 || res.status === 503 || res.status === 504 || res.status === 500) {
-    return "Can't reach the AI server. Make sure the API is running.";
-  }
+  if (res.status >= 500) return "Gemini is temporarily unavailable. Please try again.";
   return `Request failed (${res.status})`;
 }
 
@@ -39,7 +34,7 @@ export async function fetchModels(refresh = false, signal?: AbortSignal): Promis
     });
   } catch (err) {
     if ((err as Error).name === "AbortError") throw err;
-    throw new ApiError("Can't reach the AI server. Make sure the API is running.");
+    throw new ApiError("Can't reach the Gemini API route.");
   }
   if (!res.ok) throw new ApiError(await errorMessage(res), res.status);
   return (await res.json()) as ModelsResponse;
@@ -75,7 +70,7 @@ export async function streamChat({
     });
   } catch (err) {
     if ((err as Error).name === "AbortError") throw err;
-    throw new ApiError("Can't reach the AI server. Make sure the API is running.");
+    throw new ApiError("Can't reach the Gemini API route.");
   }
   if (!res.ok) throw new ApiError(await errorMessage(res), res.status);
   if (!res.body) throw new ApiError("The server returned an empty response.");
@@ -83,7 +78,6 @@ export async function streamChat({
   const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
   let buffer = "";
   let finished = false;
-
   const handle = (block: string) => {
     let event = "message";
     const data: string[] = [];

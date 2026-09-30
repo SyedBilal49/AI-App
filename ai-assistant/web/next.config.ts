@@ -1,19 +1,10 @@
 import type { NextConfig } from "next";
 
-// Where the FastAPI server lives. Server-side only; the browser calls /api/* on
-// this app and Next.js forwards it, so there is no CORS setup to manage.
-const API_URL = process.env.API_URL ?? "http://localhost:8000";
-
 const nextConfig: NextConfig = {
-  output: "standalone",
   poweredByHeader: false,
-  // Compression would buffer the chat event stream; let your proxy/CDN compress instead.
+  // Keep streaming responses uncompressed so tokens reach the browser immediately.
   compress: false,
   devIndicators: false,
-  
-  async rewrites() {
-    return [{ source: "/api/:path*", destination: `${API_URL}/api/:path*` }];
-  },
   async headers() {
     return [
       {

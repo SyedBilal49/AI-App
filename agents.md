@@ -2,37 +2,25 @@
 
 ## Stack
 
-* **Frontend:** Node 24, Next.js 16, React 19, TypeScript 7, Tailwind CSS 4, shadcn/ui — `frontend/` :3000
-* **Backend:** FastAPI, Python 3.13, uv, Ruff, Pytest — `backend/` :8000
-* **Local AI:** Ollama — `localhost:11434`, `gemma3:1b`
-* **Cloud AI:** OpenAI, Anthropic, Gemini, Grok, Meta — fallback providers
+- **Frontend and Vercel API:** Next.js 16, React 19, TypeScript 7, Tailwind CSS 4, shadcn/ui
+- **AI provider:** Google Gemini via server-side Next.js route handlers
+- **Optional local backend:** FastAPI under `ai-assistant/api/` for local/Docker development only
 
 ## Commands
 
 ```bash
-# Frontend
-cd frontend
-npm install
+cd ai-assistant/web
+npm ci
+cp .env.example .env.local
+# Set GEMINI_API_KEY in .env.local
 npm run dev
-npm install <package-name>
-
-# Backend
-cd backend
-uv sync
-uv run fastapi dev
-uv add <package-name>
-
-# Tests
-cd backend
-pytest
+npm run typecheck
+npm run build
 ```
 
 ## Rules
 
-* Never commit `.env`, secrets, or API keys.
-* Run tests after every change.
-* Keep changes minimal and focused.
-* Follow existing project patterns and conventions.
-* Prefer type-safe, clean, maintainable code.
-* Update tests when behavior changes.
-* Do not introduce dependencies without a clear need.
+- Never commit `.env`, secrets, or API keys.
+- Keep `GEMINI_API_KEY` server-side; never use a `NEXT_PUBLIC_` variable for it.
+- Run typecheck and production build after changes.
+- Keep changes minimal, type-safe, and maintainable.
